@@ -1,11 +1,10 @@
-#[cfg(not(feature = "std"))]
-type String = heapless::String<{ crate::partition::MAX_NAME_LEN }>;
-#[cfg(not(feature = "std"))]
-type Vec<T> = heapless::Vec<T, { crate::MD5_NUM_MAGIC_BYTES }>;
+use alloc::string::String;
+use alloc::vec::Vec;
+
+use thiserror::Error;
 
 /// Partition table errors
-#[derive(Debug)]
-#[cfg_attr(feature = "std", derive(thiserror::Error))]
+#[derive(Debug, Error)]
 pub enum Error {
     /// Two or more partitions with the same name were found
     #[cfg_attr(
@@ -107,4 +106,11 @@ pub enum Error {
     #[cfg_attr(docsrs, doc(cfg(feature = "std")))]
     #[cfg_attr(feature = "std", error(transparent))]
     IoError(#[from] std::io::Error),
+}
+
+#[cfg(not(feature = "std"))]
+impl core::fmt::Display for Error {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.write_fmt(format_args!("{:?}", self))
+    }
 }

@@ -13,8 +13,7 @@ pub(crate) use self::de::{DeserializedBinPartition, DeserializedCsvPartition};
 #[cfg(feature = "std")]
 mod de;
 
-#[cfg(not(feature = "std"))]
-type String = heapless::String<MAX_NAME_LEN>;
+use alloc::string::String;
 
 pub(crate) const APP_PARTITION_ALIGNMENT: u32 = 0x10000;
 pub(crate) const DATA_PARTITION_ALIGNMENT: u32 = 0x1000;
@@ -199,23 +198,23 @@ impl SubType {
 #[strum(serialize_all = "snake_case")]
 pub enum AppType {
     Factory = 0x00,
-    Ota_0   = 0x10,
-    Ota_1   = 0x11,
-    Ota_2   = 0x12,
-    Ota_3   = 0x13,
-    Ota_4   = 0x14,
-    Ota_5   = 0x15,
-    Ota_6   = 0x16,
-    Ota_7   = 0x17,
-    Ota_8   = 0x18,
-    Ota_9   = 0x19,
-    Ota_10  = 0x1A,
-    Ota_11  = 0x1B,
-    Ota_12  = 0x1C,
-    Ota_13  = 0x1D,
-    Ota_14  = 0x1E,
-    Ota_15  = 0x1F,
-    Test    = 0x20,
+    Ota_0 = 0x10,
+    Ota_1 = 0x11,
+    Ota_2 = 0x12,
+    Ota_3 = 0x13,
+    Ota_4 = 0x14,
+    Ota_5 = 0x15,
+    Ota_6 = 0x16,
+    Ota_7 = 0x17,
+    Ota_8 = 0x18,
+    Ota_9 = 0x19,
+    Ota_10 = 0x1A,
+    Ota_11 = 0x1B,
+    Ota_12 = 0x1C,
+    Ota_13 = 0x1D,
+    Ota_14 = 0x1E,
+    Ota_15 = 0x1F,
+    Test = 0x20,
 }
 
 /// Partition sub-types which can be used with [`Type::Data`] partitions
@@ -243,19 +242,19 @@ pub enum AppType {
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
 pub enum DataType {
-    Ota       = 0x00,
-    Phy       = 0x01,
-    Nvs       = 0x02,
-    Coredump  = 0x03,
-    NvsKeys   = 0x04,
+    Ota = 0x00,
+    Phy = 0x01,
+    Nvs = 0x02,
+    Coredump = 0x03,
+    NvsKeys = 0x04,
     #[serde(rename = "efuse")]
     #[strum(serialize = "efuse")]
-    EfuseEm   = 0x05,
+    EfuseEm = 0x05,
     Undefined = 0x06,
-    Esphttpd  = 0x80,
-    Fat       = 0x81,
-    Spiffs    = 0x82,
-    Littlefs  = 0x83,
+    Esphttpd = 0x80,
+    Fat = 0x81,
+    Spiffs = 0x82,
+    Littlefs = 0x83,
 }
 
 /// A single partition definition

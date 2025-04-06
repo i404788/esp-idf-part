@@ -39,6 +39,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+extern crate alloc;
+
 use core::ops::Rem as _;
 #[cfg(feature = "std")]
 use std::io::Write as _;
@@ -60,8 +62,7 @@ use self::{
 mod error;
 mod partition;
 
-#[cfg(not(feature = "std"))]
-type Vec<T> = heapless::Vec<T, PARTITION_SIZE>;
+use alloc::vec::Vec;
 
 pub(crate) const MD5_NUM_MAGIC_BYTES: usize = 16;
 #[cfg(feature = "std")]
@@ -372,8 +373,7 @@ impl PartitionTable {
 mod hash_writer {
     use md5::{
         digest::{consts::U16, generic_array::GenericArray},
-        Digest,
-        Md5,
+        Digest, Md5,
     };
 
     pub(crate) struct HashWriter<W> {
