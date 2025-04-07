@@ -2,6 +2,7 @@ use core::cmp::{max, min};
 
 #[cfg(feature = "std")]
 use deku::{DekuError, DekuRead, DekuReader};
+#[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "std")]
 use strum::IntoEnumIterator;
@@ -13,6 +14,7 @@ pub(crate) use self::de::{DeserializedBinPartition, DeserializedCsvPartition};
 #[cfg(feature = "std")]
 mod de;
 
+use alloc::format;
 use alloc::string::String;
 
 pub(crate) const APP_PARTITION_ALIGNMENT: u32 = 0x10000;
@@ -28,13 +30,14 @@ pub(crate) const MAX_NAME_LEN: usize = 16;
 /// For additional information regarding the supported partition types, please
 /// refer to the ESP-IDF documentation:
 /// <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/partition-tables.html#type-field>
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "std", derive(Deserialize, Serialize))]
 #[cfg_attr(
     feature = "std",
     derive(DekuRead),
     deku(endian = "little", id_type = "u8")
 )]
-#[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "std", serde(rename_all = "lowercase"))]
 pub enum Type {
     #[cfg_attr(feature = "std", deku(id = "0x00"))]
     App,
@@ -50,8 +53,8 @@ impl core::fmt::Display for Type {
             f,
             "{}",
             match self {
-                Type::App | Type::Data => serde_plain::to_string(self).unwrap(),
-                Type::Custom(ty) => serde_plain::to_string(&format_args!("{:#04x}", ty)).unwrap(),
+                Type::App | Type::Data => format!("{:?}", self),
+                Type::Custom(ty) => format!("{:#04x}", ty),
             }
         )
     }
@@ -88,7 +91,7 @@ impl Type {
             Type::App => "'factory', 'ota_0' through 'ota_15', or 'test'".into(),
             Type::Data => {
                 let types = DataType::iter()
-                    .map(|dt| format!("'{}'", serde_plain::to_string(&dt).unwrap()))
+                    .map(|dt| format!("'{:?}'", &dt))
                     .collect::<Vec<_>>();
 
                 let (tail, head) = types.split_last().unwrap();
@@ -108,8 +111,9 @@ impl Type {
 /// For additional information regarding the supported partition subtypes,
 /// please refer to the ESP-IDF documentation:
 /// <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/partition-tables.html#subtype>
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
-#[serde(untagged)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "std", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "std", serde(untagged))]
 pub enum SubType {
     App(AppType),
     Data(DataType),
@@ -122,10 +126,9 @@ impl core::fmt::Display for SubType {
             f,
             "{}",
             match self {
-                SubType::App(ty) => serde_plain::to_string(ty).unwrap(),
-                SubType::Data(ty) => serde_plain::to_string(ty).unwrap(),
-                SubType::Custom(ty) =>
-                    serde_plain::to_string(&format_args!("{:#04x}", ty)).unwrap(),
+                SubType::App(ty) => format!("{:?}", ty),
+                SubType::Data(ty) => format!("{:?}", ty),
+                SubType::Custom(ty) => format!("{:#04x}", ty),
             }
         )
     }
@@ -176,25 +179,14 @@ impl SubType {
 /// A full list of support subtypes can be found in the ESP-IDF documentation:
 /// <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/partition-tables.html#subtype>
 #[allow(non_camel_case_types)]
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Deserialize,
-    EnumIter,
-    EnumString,
-    VariantNames,
-    FromRepr,
-    Serialize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, EnumString, VariantNames, FromRepr)]
+#[cfg_attr(feature = "std", derive(Deserialize, Serialize))]
 #[cfg_attr(
     feature = "std",
     derive(DekuRead),
     deku(endian = "little", id_type = "u8")
 )]
-#[serde(rename_all = "snake_case")]
+#[cfg_attr(feature = "std", serde(rename_all = "snake_case"))]
 #[strum(serialize_all = "snake_case")]
 pub enum AppType {
     Factory = 0x00,
@@ -221,25 +213,14 @@ pub enum AppType {
 ///
 /// A full list of support subtypes can be found in the ESP-IDF documentation:
 /// <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/partition-tables.html#subtype>
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Deserialize,
-    EnumIter,
-    EnumString,
-    VariantNames,
-    FromRepr,
-    Serialize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, EnumString, VariantNames, FromRepr)]
+#[cfg_attr(feature = "std", derive(Deserialize, Serialize))]
 #[cfg_attr(
     feature = "std",
     derive(DekuRead),
     deku(endian = "little", id_type = "u8")
 )]
-#[serde(rename_all = "snake_case")]
+#[cfg_attr(feature = "std", serde(rename_all = "snake_case"))]
 #[strum(serialize_all = "snake_case")]
 pub enum DataType {
     Ota = 0x00,
@@ -247,7 +228,7 @@ pub enum DataType {
     Nvs = 0x02,
     Coredump = 0x03,
     NvsKeys = 0x04,
-    #[serde(rename = "efuse")]
+    #[cfg_attr(feature = "std", serde(rename = "efuse"))]
     #[strum(serialize = "efuse")]
     EfuseEm = 0x05,
     Undefined = 0x06,
@@ -258,7 +239,8 @@ pub enum DataType {
 }
 
 /// A single partition definition
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[cfg_attr(feature = "std", derive(Deserialize, Serialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Partition {
     name: String,
     ty: Type,

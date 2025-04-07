@@ -47,6 +47,7 @@ use std::io::Write as _;
 
 #[cfg(feature = "std")]
 use deku::prelude::DekuContainerRead as _;
+#[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
 
 pub use self::{
@@ -72,7 +73,8 @@ const MD5_PART_MAGIC_BYTES: [u8; MD5_NUM_MAGIC_BYTES] = [
 const PARTITION_SIZE: usize = 32;
 
 /// A partition table; a collection of partitions
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "std", derive(Deserialize, Serialize))]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PartitionTable {
     partitions: Vec<Partition>,
 }
